@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шкафчик</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<style>
+:root{--bg:#f2f4fb;--panel:#ffffff;--ink:#16143a;--mute:#6b6d92;--line:#dcdff0;--accent:#5b4dff;--accent-ink:#ffffff;--chip:#eceefa;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14122b;--panel:#1d1a40;--ink:#f1f0ff;--mute:#9a98c8;--line:#2e2a5e;--accent:#7fd4ff;--accent-ink:#14122b;--chip:#26225a}}
+:root[data-theme="dark"]{--bg:#14122b;--panel:#1d1a40;--ink:#f1f0ff;--mute:#9a98c8;--line:#2e2a5e;--accent:#7fd4ff;--accent-ink:#14122b;--chip:#26225a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 "Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{margin:0;font-size:22px;font-weight:800}
+.sub{color:var(--mute);font-size:13px}
+.total{font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--accent)}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:6px}
+.bar i{display:block;min-width:3px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 0 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 14px;font:inherit;cursor:pointer;text-align:left}
+.tab b{display:block;font-size:20px;font-weight:800;line-height:1.1}
+.tab span{font-size:12px;color:var(--mute)}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab[aria-selected="true"] span{color:inherit;opacity:.8}
+.tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
+.list{display:flex;flex-wrap:wrap;gap:6px}
+.list span{background:var(--chip);border-radius:8px;padding:6px 10px;font-size:14px}
+.note,.empty{color:var(--mute);font-size:13px;margin-top:14px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1 id="nick">Шкафчик</h1><div class="sub" id="sub"></div></div>
+    <div class="total" id="total">0</div>
+  </header>
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <input id="q" type="search" placeholder="Найти предмет" autocomplete="off">
+  <div class="list" id="list"></div>
+  <div class="note" id="note"></div>
+</main>
+<script>
+var COLORS=["#7fd4ff","#b86bff","#f2b84b","#5fd68a","#ff7a8a"];
+var DEMO={n:"Демо-аккаунт",t:{"Скины":3,"Кирки":2,"Дельтапланы":1,"Рюкзаки":1,"Эмоции":2},
+c:{"Скины":["Пример скина 1","Пример скина 2","Пример скина 3"],"Кирки":["Пример кирки 1","Пример кирки 2"],"Дельтапланы":["Пример дельтаплана"],"Рюкзаки":["Пример рюкзака"],"Эмоции":["Пример эмоции 1","Пример эмоции 2"]}};
+function load(){
+  try{
+    var h=location.hash.slice(1); if(!h) return DEMO;
+    h=h.replace(/-/g,"+").replace(/_/g,"/"); while(h.length%4) h+="=";
+    var bin=atob(h), arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    return JSON.parse(pako.inflate(arr,{to:"string"}));
+  }catch(e){ return DEMO; }
+}
+var D=load(), cats=Object.keys(D.t), cur=cats[0];
+var tg=window.Telegram&&window.Telegram.WebApp;
+if(tg){try{tg.ready();tg.expand();}catch(e){}}
+document.getElementById("nick").textContent=D.n||"Шкафчик";
+var total=cats.reduce(function(s,k){return s+D.t[k]},0);
+document.getElementById("total").textContent=total;
+document.getElementById("sub").textContent="предметов в шкафчике";
+document.getElementById("bar").innerHTML=cats.map(function(k,i){
+  return '<i title="'+k+'" style="flex:'+Math.max(D.t[k],1)+';background:'+COLORS[i%COLORS.length]+'"></i>'}).join("");
+var tabs=document.getElementById("tabs");
+tabs.innerHTML=cats.map(function(k){
+  return '<button class="tab" role="tab" data-k="'+k+'"><b>'+D.t[k]+'</b><span>'+k+'</span></button>'}).join("");
+tabs.addEventListener("click",function(e){var b=e.target.closest(".tab"); if(b){cur=b.dataset.k;render();}});
+document.getElementById("q").addEventListener("input",render);
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function render(){
+  var q=document.getElementById("q").value.trim().toLowerCase();
+  Array.prototype.forEach.call(tabs.children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
+  var all=(D.c[cur]||[]), items=all.filter(function(n){return n.toLowerCase().indexOf(q)>-1});
+  document.getElementById("list").innerHTML=items.length?items.map(function(n){return"<span>"+esc(n)+"</span>"}).join(""):"";
+  var note="";
+  if(!items.length) note="Ничего не найдено. Проверьте написание или выберите другую категорию.";
+  else if(all.length<D.t[cur]) note="Показана часть списка ("+all.length+" из "+D.t[cur]+"). Полный список бот прислал файлом.";
+  document.getElementById("note").textContent=note;
+}
+render();
+</script>
+</body>
+</html>
