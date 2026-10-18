@@ -54,7 +54,7 @@ var DEMO={n:"Демо-аккаунт",t:{"Скины":3,"Кирки":2,"Дель
 c:{"Скины":["Пример скина 1","Пример скина 2","Пример скина 3"],"Кирки":["Пример кирки 1","Пример кирки 2"],"Дельтапланы":["Пример дельтаплана"],"Рюкзаки":["Пример рюкзака"],"Эмоции":["Пример эмоции 1","Пример эмоции 2"]}};
 function load(){
   try{
-    var h=location.hash.slice(1); if(!h) return DEMO;
+    var h=new URLSearchParams(location.search).get("d")||location.hash.slice(1); if(!h) return DEMO;
     h=h.replace(/-/g,"+").replace(/_/g,"/"); while(h.length%4) h+="=";
     var bin=atob(h), arr=new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
