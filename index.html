@@ -35,14 +35,14 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 </head>
 <body>
 <main>
-<header>
-<div><h1 id="nick">Шкафчик</h1><div class="sub" id="sub">загружаю каталог…</div></div>
-<div class="total" id="total">0</div>
-</header>
-<div class="tabs" id="tabs" role="tablist"></div>
-<input id="q" type="search" placeholder="Найти предмет" autocomplete="off">
-<div class="grid" id="grid"></div>
-<div class="msg" id="msg"></div>
+  <header>
+    <div><h1 id="nick">Шкафчик</h1><div class="sub" id="sub">загружаю каталог…</div></div>
+    <div class="total" id="total">0</div>
+  </header>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <input id="q" type="search" placeholder="Найти предмет" autocomplete="off">
+  <div class="grid" id="grid"></div>
+  <div class="msg" id="msg"></div>
 </main>
 <script>
 var API="https://fortnite-api.com/v2/cosmetics/br?language=ru";
@@ -52,35 +52,35 @@ var COL={mythic:"#ffd24a",legendary:"#f29a2e",epic:"#b95cf4",rare:"#3fa9f5",unco
 var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d");
 document.getElementById("nick").textContent=P.get("n")||(demo?"Демо":"Шкафчик");
 function bits(s){ // "N.base64url" -> {n, test(i)}
-var a=s.split("."), b=a[1].replace(/-/g,"+").replace(/_/g,"/"); while(b.length%4)b+="=";
-var bin=atob(b), u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-return {n:+a[0],test:function(i){return (u[i>>3]>>(i&7))&1}};
+  var a=s.split("."), b=a[1].replace(/-/g,"+").replace(/_/g,"/"); while(b.length%4)b+="=";
+  var bin=atob(b), u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  return {n:+a[0],test:function(i){return (u[i>>3]>>(i&7))&1}};
 }
 function rank(r){var i=RANK.indexOf(r);return i<0?99:i}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 fetch(API).then(function(r){return r.json()}).then(function(j){
-var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon}});
-all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
-var mine;
-if(demo){mine=all.filter(function(_,i){return i%30===0});}
-else{var B=bits(P.get("d")); mine=all.filter(function(_,i){return B.test(i)});
-if(B.n!==all.length) NOTE="Каталог предметов обновился, часть предметов может отображаться неточно.";}
-TYPES.forEach(function(t){by[t[0]]=mine.filter(function(c){return c.type===t[0]}).sort(function(a,b){return rank(a.rar)-rank(b.rar)||a.name.localeCompare(b.name)})});
-var total=TYPES.reduce(function(s,t){return s+by[t[0]].length},0);
-document.getElementById("total").textContent=total;
-document.getElementById("sub").textContent=demo?"демо: откройте через бота":"предметов в шкафчике";
-document.getElementById("tabs").innerHTML=TYPES.map(function(t){return'<button class="tab" role="tab" data-k="'+t[0]+'"><b>'+by[t[0]].length+'</b><span>'+t[1]+'</span></button>'}).join("");
-render();
+  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon}});
+  all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
+  var mine;
+  if(demo){mine=all.filter(function(_,i){return i%30===0});}
+  else{var B=bits(P.get("d")); mine=all.filter(function(_,i){return B.test(i)});
+    if(B.n!==all.length) NOTE="Каталог предметов обновился, часть предметов может отображаться неточно.";}
+  TYPES.forEach(function(t){by[t[0]]=mine.filter(function(c){return c.type===t[0]}).sort(function(a,b){return rank(a.rar)-rank(b.rar)||a.name.localeCompare(b.name)})});
+  var total=TYPES.reduce(function(s,t){return s+by[t[0]].length},0);
+  document.getElementById("total").textContent=total;
+  document.getElementById("sub").textContent=demo?"демо: откройте через бота":"предметов в шкафчике (каталог: "+all.length+", у бота: "+B.n+")";
+  document.getElementById("tabs").innerHTML=TYPES.map(function(t){return'<button class="tab" role="tab" data-k="'+t[0]+'"><b>'+by[t[0]].length+'</b><span>'+t[1]+'</span></button>'}).join("");
+  render();
 }).catch(function(){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте интернет и откройте шкафчик заново.";});
 document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b){cur=b.dataset.k;render();}});
 document.getElementById("q").addEventListener("input",render);
 function render(){
-var q=document.getElementById("q").value.trim().toLowerCase();
-Array.prototype.forEach.call(document.getElementById("tabs").children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
-var items=(by[cur]||[]).filter(function(c){return c.name.toLowerCase().indexOf(q)>-1});
-document.getElementById("grid").innerHTML=items.map(function(c){
-return'<div class="card" style="--c:'+(COL[c.rar]||"#ffd24a")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
-document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
+  var q=document.getElementById("q").value.trim().toLowerCase();
+  Array.prototype.forEach.call(document.getElementById("tabs").children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
+  var items=(by[cur]||[]).filter(function(c){return c.name.toLowerCase().indexOf(q)>-1});
+  document.getElementById("grid").innerHTML=items.map(function(c){
+    return'<div class="card" style="--c:'+(COL[c.rar]||"#ffd24a")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
+  document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
 </script>
 </body>
