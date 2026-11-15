@@ -27,7 +27,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:5px}
 .card{min-width:0;aspect-ratio:1/1;background:radial-gradient(circle at 50% 42%,var(--glow,rgba(154,163,173,.38)) 0%,transparent 72%),var(--panel);border-radius:8px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column}
-.card img{display:block;width:100%;height:calc(100% - 21px);min-height:0;flex:1;object-fit:contain;background:transparent}
+.card img{display:block;width:100%;height:calc(100% - 19px);min-height:0;flex:1;object-fit:contain;background:transparent;padding:2px}
 .card span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:22px;max-height:22px;padding:2px 3px;font-size:9px;line-height:9px;text-align:center;overflow-wrap:anywhere;word-break:break-word}
 .msg{color:var(--mute);font-size:11px;margin:6px 0}
 .pagebar{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0}
@@ -63,7 +63,7 @@ function rank(r){var i=RANK.indexOf(r);return i<0?99:i}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 fetch(API).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(j){
   if(!j||!Array.isArray(j.data))throw new Error("Некорректный ответ каталога");
-  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon||(c.images||{}).icon||(c.images||{}).featured,series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
+  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,imgs:[(c.images||{}).smallIcon,(c.images||{}).icon,(c.images||{}).featured,(c.images||{}).other].filter(function(v,i,a){return typeof v==="string"&&v&&a.indexOf(v)===i}),series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
   all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
   var mine;
   if(demo){mine=all.filter(function(_,i){return i%30===0});}
@@ -86,6 +86,18 @@ document.getElementById("tabs").addEventListener("click",function(e){var b=e.tar
 document.getElementById("q").addEventListener("input",function(){page=0;render();});
 document.getElementById("prev").addEventListener("click",function(){if(page>0){page--;render();}});
 document.getElementById("next").addEventListener("click",function(){page++;render();});
+function nextItemImage(img){
+  var list=[];
+  try{list=JSON.parse(decodeURIComponent(img.getAttribute("data-images")||"%5B%5D"));}catch(e){}
+  var next=+(img.getAttribute("data-index")||0)+1;
+  if(next<list.length){
+    img.setAttribute("data-index",String(next));
+    img.src=list[next];
+  }else{
+    img.onerror=null;
+    img.style.display="none";
+  }
+}
 function render(){
   var q=document.getElementById("q").value.trim().toLowerCase();
   Array.prototype.forEach.call(document.getElementById("tabs").children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
@@ -95,7 +107,9 @@ function render(){
   document.getElementById("pageinfo").textContent=(page+1)+" / "+pages;
   document.getElementById("prev").disabled=page===0;document.getElementById("next").disabled=page>=pages-1;
   document.getElementById("grid").innerHTML=shown.map(function(c){
-    return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
+    var urls=encodeURIComponent(JSON.stringify(c.imgs||[]));
+    var first=(c.imgs&&c.imgs.length)?c.imgs[0]:"";
+    return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+'"><img loading="eager" decoding="async" referrerpolicy="no-referrer" alt="" data-images="'+urls+'" data-index="0" onerror="nextItemImage(this)" src="'+esc(first)+'"><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
 </script>
