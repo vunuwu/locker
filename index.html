@@ -26,8 +26,8 @@ h1{margin:0;font-size:22px;font-weight:800}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px}
-.card{min-width:0;aspect-ratio:1/1;background:var(--panel);border-radius:8px;overflow:hidden;border:1px solid var(--line);border-bottom:3px solid var(--c,#9aa3ad);display:flex;flex-direction:column}
-.card img{display:block;width:100%;min-height:0;flex:1;object-fit:contain;background:var(--line)}
+.card{min-width:0;aspect-ratio:1/1;background:radial-gradient(circle at 50% 42%,var(--glow,rgba(154,163,173,.38)) 0%,transparent 72%),var(--panel);border-radius:8px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column}
+.card img{display:block;width:100%;min-height:0;flex:1;object-fit:contain;background:transparent}
 .card span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:22px;max-height:22px;padding:2px 3px;font-size:9px;line-height:9px;text-align:center;overflow-wrap:anywhere;word-break:break-word}
 .msg{color:var(--mute);font-size:11px;margin:6px 0}
 .pagebar{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0}
@@ -44,14 +44,14 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
   <div class="tabs" id="tabs" role="tablist"></div>
   <input id="q" type="search" placeholder="Найти предмет" autocomplete="off">
   <div class="grid" id="grid"></div>
-  
+  <div class="pagebar"><button id="prev" type="button">←</button><span id="pageinfo">1 / 1</span><button id="next" type="button">→</button></div>
   <div class="msg" id="msg"></div>
 </main>
 <script>
 var API="https://fortnite-api.com/v2/cosmetics/br?language=ru";
 var TYPES=[["outfit","Скины"],["backpack","Рюкзаки"],["pickaxe","Кирки"],["glider","Дельтапланы"],["emote","Эмоции и эмодзи"],["wrap","Обёртки"],["contrail","Следы"],["loadingscreen","Загрузка"],["music","Музыка"],["spray","Спреи"],["toy","Игрушки"],["exclusive","Все эксклюзивы"]];
 var RANK=["mythic","legendary","icon","marvel","dc","starwars","gaminglegends","dark","shadow","slurp","frozen","lava","epic","rare","uncommon","common"];
-var COL={mythic:"#ffd24a",legendary:"#f29a2e",epic:"#b95cf4",rare:"#3fa9f5",uncommon:"#6fcf4a",common:"#9aa3ad"};
+var GLOW={mythic:"rgba(255,210,74,.62)",legendary:"rgba(242,154,46,.58)",epic:"rgba(185,92,244,.55)",rare:"rgba(63,169,245,.52)",uncommon:"rgba(111,207,74,.48)",common:"rgba(154,163,173,.38)"};
 var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d"), page=0, PAGE_SIZE=1000000;
 document.getElementById("nick").textContent=P.get("n")||(demo?"Демо":"Шкафчик");
 function bits(s){ // "N.base64url" -> {n, test(i)}
@@ -61,7 +61,8 @@ function bits(s){ // "N.base64url" -> {n, test(i)}
 }
 function rank(r){var i=RANK.indexOf(r);return i<0?99:i}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-fetch(API).then(function(r){return r.json()}).then(function(j){
+fetch(API).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(j){
+  if(!j||!Array.isArray(j.data))throw new Error("Некорректный ответ каталога");
   var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon,series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
   all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
   var mine;
@@ -80,7 +81,7 @@ fetch(API).then(function(r){return r.json()}).then(function(j){
   document.getElementById("sub").textContent=demo?"демо: откройте через бота":"предметов в шкафчике";
   document.getElementById("tabs").innerHTML=TYPES.map(function(t){return'<button class="tab" role="tab" data-k="'+t[0]+'"><b>'+by[t[0]].length+'</b><span>'+t[1]+'</span></button>'}).join("");
   render();
-}).catch(function(){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте интернет и откройте шкафчик заново.";});
+}).catch(function(err){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте подключение к интернету и попробуйте обновить страницу. ("+(err&&err.message?err.message:"ошибка сети")+")";});
 document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b){cur=b.dataset.k;page=0;render();}});
 document.getElementById("q").addEventListener("input",function(){page=0;render();});
 document.getElementById("prev").addEventListener("click",function(){if(page>0){page--;render();}});
@@ -94,7 +95,7 @@ function render(){
   document.getElementById("pageinfo").textContent=(page+1)+" / "+pages;
   document.getElementById("prev").disabled=page===0;document.getElementById("next").disabled=page>=pages-1;
   document.getElementById("grid").innerHTML=shown.map(function(c){
-    return'<div class="card" style="--c:'+(COL[c.rar]||"#ffd24a")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
+    return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
 </script>
