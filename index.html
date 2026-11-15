@@ -25,15 +25,15 @@ h1{margin:0;font-size:22px;font-weight:800}
 .tab[aria-selected="true"] span{color:inherit;opacity:.8}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
-.card{min-width:0;aspect-ratio:1/1;background:radial-gradient(circle at 50% 42%,var(--glow,rgba(154,163,173,.38)) 0%,transparent 72%),var(--panel);border-radius:8px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column}
-.card img{display:block;width:100%;height:calc(100% - 25px);min-height:0;flex:1;object-fit:contain;background:transparent;padding:0;transform:scale(1.12)}
+.grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:5px}
+.card{min-width:0;background:radial-gradient(circle at 50% 38%,var(--glow,rgba(154,163,173,.38)) 0%,transparent 72%),var(--panel);border-radius:8px;overflow:hidden;border:1px solid var(--line);border-bottom:3px solid var(--bar,#9aa3ad);display:flex;flex-direction:column}
+.card img{display:block;width:100%;aspect-ratio:1/1;height:auto;flex:none;object-fit:cover;background:transparent}
 .card span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:22px;max-height:22px;padding:2px 3px;font-size:9px;line-height:9px;text-align:center;overflow-wrap:anywhere;word-break:break-word}
 .msg{color:var(--mute);font-size:11px;margin:6px 0}
 .pagebar{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0}
 .pagebar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 12px;font:inherit}
 .pagebar button:disabled{opacity:.35}
-@media(max-width:600px){.grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.card span{font-size:8px;line-height:9px;min-height:21px;max-height:21px}} @media(max-width:360px){.tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}.tab{padding:3px 1px}.tab b{font-size:12px}.tab span{font-size:7px}.grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}}</style>
+@media(max-width:600px){.grid{grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}.card span{font-size:8px;line-height:9px;min-height:21px;max-height:21px}} @media(max-width:360px){.tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}.tab{padding:3px 1px}.tab b{font-size:12px}.tab span{font-size:7px}.grid{grid-template-columns:repeat(14,minmax(0,1fr));gap:3px}}</style>
 </head>
 <body>
 <main>
@@ -52,6 +52,7 @@ var API="https://fortnite-api.com/v2/cosmetics/br?language=ru";
 var TYPES=[["outfit","Скины"],["backpack","Рюкзаки"],["pickaxe","Кирки"],["glider","Дельтапланы"],["emote","Эмоции и эмодзи"],["wrap","Обёртки"],["contrail","Следы"],["loadingscreen","Загрузка"],["music","Музыка"],["spray","Спреи"],["toy","Игрушки"],["exclusive","Все эксклюзивы"]];
 var RANK=["mythic","legendary","icon","marvel","dc","starwars","gaminglegends","dark","shadow","slurp","frozen","lava","epic","rare","uncommon","common"];
 var GLOW={mythic:"rgba(255,210,74,.62)",legendary:"rgba(242,154,46,.58)",epic:"rgba(185,92,244,.55)",rare:"rgba(63,169,245,.52)",uncommon:"rgba(111,207,74,.48)",common:"rgba(154,163,173,.38)"};
+var BAR={mythic:"#ffd24a",legendary:"#f29a2e",epic:"#b95cf4",rare:"#3fa9f5",uncommon:"#6fcf4a",common:"#9aa3ad",icon:"#4fd8e8",marvel:"#e23b3b",dc:"#3b6fe2",starwars:"#4a8fd8",gaminglegends:"#8a5cf4",dark:"#d84ad0",shadow:"#777b86",slurp:"#2fd0c0",frozen:"#8fd8ff",lava:"#ff6a2a"};
 var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d"), page=0, PAGE_SIZE=1000000;
 document.getElementById("nick").textContent=P.get("n")||(demo?"Демо":"Шкафчик");
 function bits(s){ // "N.base64url" -> {n, test(i)}
@@ -95,7 +96,7 @@ function render(){
   document.getElementById("pageinfo").textContent=(page+1)+" / "+pages;
   document.getElementById("prev").disabled=page===0;document.getElementById("next").disabled=page>=pages-1;
   document.getElementById("grid").innerHTML=shown.map(function(c){
-    return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
+    return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+';--bar:'+(BAR[c.series&&BAR[c.series.toLowerCase()]?c.series.toLowerCase():c.rar]||"#9aa3ad")+'"><img loading="lazy" decoding="async" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
 </script>
