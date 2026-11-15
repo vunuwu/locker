@@ -17,21 +17,20 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
 h1{margin:0;font-size:22px;font-weight:800}
 .sub{color:var(--mute);font-size:13px}
 .total{font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--accent)}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 14px;font:inherit;cursor:pointer;text-align:left}
-.tab b{display:block;font-size:20px;font-weight:800;line-height:1.1}
-.tab span{font-size:12px;color:var(--mute)}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px 0 10px}
+.tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:6px 7px;font:inherit;cursor:pointer;text-align:center}
+.tab b{display:block;font-size:17px;font-weight:800;line-height:1.1}
+.tab span{font-size:11px;color:var(--mute)}
 .tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
 .tab[aria-selected="true"] span{color:inherit;opacity:.8}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
-.card{background:var(--panel);border-radius:10px;overflow:hidden;border-bottom:4px solid var(--c,#9aa3ad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:4px}
+.card{background:var(--panel);border-radius:7px;overflow:hidden;border-bottom:3px solid var(--c,#9aa3ad)}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--line)}
-.card span{display:block;padding:5px 6px 6px;font-size:12px;line-height:1.2;min-height:2.6em}
+.card span{display:block;padding:3px 3px 4px;font-size:9px;line-height:1.15;min-height:2.3em;overflow-wrap:anywhere}
 .msg{color:var(--mute);font-size:13px;margin:12px 0}
-</style>
+@media(max-width:360px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:3px}.card span{font-size:8px}}\n</style>
 </head>
 <body>
 <main>
