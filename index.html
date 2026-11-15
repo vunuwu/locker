@@ -63,7 +63,7 @@ function rank(r){var i=RANK.indexOf(r);return i<0?99:i}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 fetch(API).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(j){
   if(!j||!Array.isArray(j.data))throw new Error("Некорректный ответ каталога");
-  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,imgs:[(c.images||{}).icon,(c.images||{}).featured,(c.images||{}).smallIcon,(c.images||{}).other].filter(function(v,i,a){return typeof v==="string"&&v&&a.indexOf(v)===i}),series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
+  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,imgs:[(c.images||{}).smallIcon,(c.images||{}).icon,(c.images||{}).featured,(c.images||{}).other,"https://fortnite-api.com/images/cosmetics/br/"+c.id.toLowerCase()+"/smallicon.png","https://fortnite-api.com/images/cosmetics/br/"+c.id.toLowerCase()+"/icon.png"].filter(function(v,i,a){return typeof v==="string"&&v&&a.indexOf(v)===i}),series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
   all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
   var mine;
   if(demo){mine=all.filter(function(_,i){return i%30===0});}
@@ -95,6 +95,7 @@ function nextItemImage(img){
     img.src=images[next];
   }else{
     img.onerror=null;
+    img.alt="";
     img.style.display="none";
   }
 }
