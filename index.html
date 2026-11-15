@@ -12,7 +12,7 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 :root[data-theme="dark"]{--bg:#14122b;--panel:#1d1a40;--ink:#f1f0ff;--mute:#9a98c8;--line:#2e2a5e;--accent:#7fd4ff;--on:#14122b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.4 "Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
-main{max-width:640px;margin:0 auto;padding:18px 14px 40px}
+main{width:100%;max-width:none;margin:0 auto;padding:8px 4px 12px}
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
 h1{margin:0;font-size:22px;font-weight:800}
 .sub{color:var(--mute);font-size:13px}
@@ -25,12 +25,15 @@ h1{margin:0;font-size:22px;font-weight:800}
 .tab[aria-selected="true"] span{color:inherit;opacity:.8}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:3px}
-.card{background:var(--panel);border-radius:5px;overflow:hidden;border-bottom:2px solid var(--c,#9aa3ad)}
+.grid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px}
+.card{min-width:0;background:var(--panel);border-radius:4px;overflow:hidden;border-bottom:2px solid var(--c,#9aa3ad)}
 .card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--line)}
-.card span{display:block;padding:2px 2px 3px;font-size:6px;line-height:1.1;min-height:2em;overflow-wrap:anywhere}
-.msg{color:var(--mute);font-size:13px;margin:12px 0}
-@media(max-width:360px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:2px}}\n</style>
+.card span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;height:11px;padding:1px 1px 0;font-size:4px;line-height:5px;text-align:center;overflow-wrap:anywhere;word-break:break-word}
+.msg{color:var(--mute);font-size:11px;margin:6px 0}
+.pagebar{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0}
+.pagebar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 12px;font:inherit}
+.pagebar button:disabled{opacity:.35}
+@media(max-width:360px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(13,minmax(0,1fr));gap:1px}}</style>
 </head>
 <body>
 <main>
@@ -41,6 +44,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
   <div class="tabs" id="tabs" role="tablist"></div>
   <input id="q" type="search" placeholder="Найти предмет" autocomplete="off">
   <div class="grid" id="grid"></div>
+  <div class="pagebar"><button id="prev" type="button">←</button><span id="pageinfo">1 / 1</span><button id="next" type="button">→</button></div>
   <div class="msg" id="msg"></div>
 </main>
 <script>
@@ -48,7 +52,7 @@ var API="https://fortnite-api.com/v2/cosmetics/br?language=ru";
 var TYPES=[["outfit","Скины"],["backpack","Рюкзаки"],["pickaxe","Кирки"],["glider","Дельтапланы"],["emote","Эмоции"],["wrap","Обёртки"],["contrail","Следы"],["loadingscreen","Загрузка"],["music","Музыка"],["spray","Спреи"],["emoji","Смайлы"],["toy","Игрушки"]];
 var RANK=["mythic","legendary","icon","marvel","dc","starwars","gaminglegends","dark","shadow","slurp","frozen","lava","epic","rare","uncommon","common"];
 var COL={mythic:"#ffd24a",legendary:"#f29a2e",epic:"#b95cf4",rare:"#3fa9f5",uncommon:"#6fcf4a",common:"#9aa3ad"};
-var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d");
+var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d"), page=0, PAGE_SIZE=104;
 document.getElementById("nick").textContent=P.get("n")||(demo?"Демо":"Шкафчик");
 function bits(s){ // "N.base64url" -> {n, test(i)}
   var a=s.split("."), b=a[1].replace(/-/g,"+").replace(/_/g,"/"); while(b.length%4)b+="=";
@@ -71,17 +75,20 @@ fetch(API).then(function(r){return r.json()}).then(function(j){
   document.getElementById("tabs").innerHTML=TYPES.map(function(t){return'<button class="tab" role="tab" data-k="'+t[0]+'"><b>'+by[t[0]].length+'</b><span>'+t[1]+'</span></button>'}).join("");
   render();
 }).catch(function(){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте интернет и откройте шкафчик заново.";});
-document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b){cur=b.dataset.k;render();}});
-document.getElementById("q").addEventListener("input",render);
+document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b){cur=b.dataset.k;page=0;render();}});
+document.getElementById("q").addEventListener("input",function(){page=0;render();});\ndocument.getElementById("prev").addEventListener("click",function(){if(page>0){page--;render();}});\ndocument.getElementById("next").addEventListener("click",function(){page++;render();});
 function render(){
   var q=document.getElementById("q").value.trim().toLowerCase();
   Array.prototype.forEach.call(document.getElementById("tabs").children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
   var items=(by[cur]||[]).filter(function(c){return c.name.toLowerCase().indexOf(q)>-1});
-  document.getElementById("grid").innerHTML=items.map(function(c){
+  var pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));page=Math.min(page,pages-1);
+  var shown=items.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
+  document.getElementById("pageinfo").textContent=(page+1)+" / "+pages;
+  document.getElementById("prev").disabled=page===0;document.getElementById("next").disabled=page>=pages-1;
+  document.getElementById("grid").innerHTML=shown.map(function(c){
     return'<div class="card" style="--c:'+(COL[c.rar]||"#ffd24a")+'"><img loading="lazy" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
 </script>
 </body>
 </html>
-
