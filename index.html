@@ -17,10 +17,10 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
 h1{margin:0;font-size:22px;font-weight:800}
 .sub{color:var(--mute);font-size:13px}
 .total{font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--accent)}
-.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px 0 10px}
-.tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:6px 7px;font:inherit;cursor:pointer;text-align:center}
-.tab b{display:block;font-size:17px;font-weight:800;line-height:1.1}
-.tab span{font-size:11px;color:var(--mute)}
+.tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:3px 0 6px}
+.tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;padding:4px 2px;font:inherit;cursor:pointer;text-align:center;line-height:1.1}
+.tab b{display:block;font-size:13px;font-weight:800;line-height:1.05}
+.tab span{font-size:8px;color:var(--mute);display:block;line-height:1.1;overflow-wrap:anywhere}
 .tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
 .tab[aria-selected="true"] span{color:inherit;opacity:.8}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
@@ -33,7 +33,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 .pagebar{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0}
 .pagebar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 12px;font:inherit}
 .pagebar button:disabled{opacity:.35}
-@media(max-width:360px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(13,minmax(0,1fr));gap:1px}}</style>
+@media(max-width:360px){.tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}.tab{padding:3px 1px}.tab b{font-size:12px}.tab span{font-size:7px}.grid{grid-template-columns:repeat(13,minmax(0,1fr));gap:1px}}</style>
 </head>
 <body>
 <main>
@@ -49,7 +49,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 </main>
 <script>
 var API="https://fortnite-api.com/v2/cosmetics/br?language=ru";
-var TYPES=[["outfit","Скины"],["backpack","Рюкзаки"],["pickaxe","Кирки"],["glider","Дельтапланы"],["emote","Эмоции"],["wrap","Обёртки"],["contrail","Следы"],["loadingscreen","Загрузка"],["music","Музыка"],["spray","Спреи"],["emoji","Смайлы"],["toy","Игрушки"]];
+var TYPES=[["outfit","Скины"],["backpack","Рюкзаки"],["pickaxe","Кирки"],["glider","Дельтапланы"],["emote","Эмоции и эмодзи"],["wrap","Обёртки"],["contrail","Следы"],["loadingscreen","Загрузка"],["music","Музыка"],["spray","Спреи"],["toy","Игрушки"],["exclusive","Все эксклюзивы"]];
 var RANK=["mythic","legendary","icon","marvel","dc","starwars","gaminglegends","dark","shadow","slurp","frozen","lava","epic","rare","uncommon","common"];
 var COL={mythic:"#ffd24a",legendary:"#f29a2e",epic:"#b95cf4",rare:"#3fa9f5",uncommon:"#6fcf4a",common:"#9aa3ad"};
 var NOTE="", P=new URLSearchParams(location.search), by={}, cur="outfit", demo=!P.get("d"), page=0, PAGE_SIZE=104;
@@ -62,16 +62,18 @@ function bits(s){ // "N.base64url" -> {n, test(i)}
 function rank(r){var i=RANK.indexOf(r);return i<0?99:i}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 fetch(API).then(function(r){return r.json()}).then(function(j){
-  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon}});
+  var all=j.data.map(function(c){return{l:c.id.toLowerCase(),name:c.name,type:(c.type||{}).value,rar:(c.rarity||{}).value,img:(c.images||{}).smallIcon,series:(c.series||{}).value||"",set:(c.set||{}).value||"",tags:c.gameplayTags||[],shopHistory:c.shopHistory||[]}});
   all.sort(function(a,b){return a.l<b.l?-1:a.l>b.l?1:0});
   var mine;
   if(demo){mine=all.filter(function(_,i){return i%30===0});}
   else{var B=bits(P.get("d")); mine=all.filter(function(_,i){return B.test(i)});
     if(B.n!==all.length) NOTE="Каталог предметов обновился, часть предметов может отображаться неточно.";}
-  TYPES.forEach(function(t){by[t[0]]=mine.filter(function(c){return c.type===t[0]}).sort(function(a,b){return rank(a.rar)-rank(b.rar)||a.name.localeCompare(b.name)})});
-  var total=TYPES.reduce(function(s,t){return s+by[t[0]].length},0);
+  TYPES.forEach(function(t){if(t[0]==="exclusive")return;by[t[0]]=mine.filter(function(c){return t[0]==="emote"?(c.type==="emote"||c.type==="emoji"):c.type===t[0]}).sort(function(a,b){return rank(a.rar)-rank(b.rar)||a.name.localeCompare(b.name)})});
+  var promo=/playstation|xbox|samsung|nintendo|twitch|amazon|prime gaming|ikonik|galaxy|wonder|honor guard|double helix|neo versa|eon|rogue spider knight|exclusive|эксклюзив|ps4|ps5/i;
+  by.exclusive=mine.filter(function(c){var series=(c.series+" "+c.set+" "+c.tags.join(" "));var branded=promo.test(series+" "+c.name);var dates=c.shopHistory.map(function(d){return new Date(d).getTime()}).filter(function(d){return Number.isFinite(d)}).sort(function(a,b){return b-a});var old=dates.length>0&&(Date.now()-dates[0]>365*24*60*60*1000);return branded||old}).sort(function(a,b){return rank(a.rar)-rank(b.rar)||a.name.localeCompare(b.name)});
+  var total=mine.length;
   document.getElementById("total").textContent=total;
-  document.getElementById("sub").textContent=demo?"демо: откройте через бота":"предметов в шкафчике (каталог: "+all.length+", у бота: "+B.n+")";
+  document.getElementById("sub").textContent=demo?"демо: откройте через бота":"предметов в шкафчике";
   document.getElementById("tabs").innerHTML=TYPES.map(function(t){return'<button class="tab" role="tab" data-k="'+t[0]+'"><b>'+by[t[0]].length+'</b><span>'+t[1]+'</span></button>'}).join("");
   render();
 }).catch(function(){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте интернет и откройте шкафчик заново.";});
