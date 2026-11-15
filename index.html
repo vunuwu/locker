@@ -26,6 +26,8 @@ h1{margin:0;font-size:22px;font-weight:800}
 input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px 4px}
+.grid.big{grid-template-columns:repeat(13,minmax(0,1fr));gap:5px 3px}
+.grid.big .card span{font-size:6.5px;line-height:7.5px;min-height:15px}
 .card{min-width:0;display:flex;flex-direction:column;gap:2px}
 .card .ic{position:relative;width:100%;aspect-ratio:1/1;border-radius:7px;overflow:hidden;background:linear-gradient(160deg,var(--bar,#9aa3ad),color-mix(in srgb,var(--bar,#9aa3ad) 80%,#000));box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
 .card img{display:block;width:100%;height:100%;object-fit:cover;background:transparent}
@@ -96,6 +98,7 @@ function render(){
   var shown=items.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
   document.getElementById("pageinfo").textContent=(page+1)+" / "+pages;
   document.getElementById("prev").disabled=page===0;document.getElementById("next").disabled=page>=pages-1;
+  document.getElementById("grid").className="grid"+((by[cur]||[]).length>100?" big":"");
   document.getElementById("grid").innerHTML=shown.map(function(c){
     return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+';--bar:'+(BAR[c.series&&BAR[c.series.toLowerCase()]?c.series.toLowerCase():c.rar]||"#9aa3ad")+'"><div class="ic"><img loading="lazy" decoding="async" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"></div><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
