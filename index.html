@@ -6,24 +6,27 @@
 <title>Шкафчик</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f2f4fb;--panel:#fff;--ink:#16143a;--mute:#6b6d92;--line:#dcdff0;--accent:#5b4dff;--on:#fff;
+:root{--bg:#e8f2fc;--bgimg:radial-gradient(ellipse at 50% 0%,#ffffff 0%,#dcebf9 45%,#e8f2fc 80%);--panel:#fff;--ink:#0f2540;--mute:#5a7692;--line:#c9dcee;--accent:#2467b0;--on:#fff;--flake:90,150,210;--glow:rgba(36,103,176,.16);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14122b;--panel:#1d1a40;--ink:#f1f0ff;--mute:#9a98c8;--line:#2e2a5e;--accent:#7fd4ff;--on:#14122b}}
-:root[data-theme="dark"]{--bg:#14122b;--panel:#1d1a40;--ink:#f1f0ff;--mute:#9a98c8;--line:#2e2a5e;--accent:#7fd4ff;--on:#14122b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1424;--bgimg:radial-gradient(ellipse at 50% 0%,#24507f 0%,#12294a 40%,#0a1424 78%);--panel:#11233b;--ink:#eef6ff;--mute:#9bb2c8;--line:rgba(150,200,240,.22);--accent:#7cc4ff;--on:#0a1424;--flake:235,245,255;--glow:rgba(91,170,235,.28)}}
+:root[data-theme="dark"]{--bg:#0a1424;--bgimg:radial-gradient(ellipse at 50% 0%,#24507f 0%,#12294a 40%,#0a1424 78%);--panel:#11233b;--ink:#eef6ff;--mute:#9bb2c8;--line:rgba(150,200,240,.22);--accent:#7cc4ff;--on:#0a1424;--flake:235,245,255;--glow:rgba(91,170,235,.28)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.4 "Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
-main{width:100%;max-width:none;margin:0 auto;padding:8px 4px 12px}
+html{background:var(--bg)}
+body{margin:0;background:var(--bgimg) no-repeat;background-attachment:fixed;color:var(--ink);font:400 15px/1.4 "Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+main{position:relative;z-index:1;width:100%;max-width:none;margin:0 auto;padding:8px 4px 12px}
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
-h1{margin:0;font-size:22px;font-weight:800}
+h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.4px}
+h1:after{content:" ❄";font-size:15px;color:var(--accent);opacity:.8}
 .sub{color:var(--mute);font-size:13px}
-.total{font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--accent)}
+.total{font-size:54px;font-weight:800;line-height:.9;letter-spacing:-.04em;color:var(--accent);text-shadow:0 0 22px var(--glow)}
 .tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:3px 0 6px}
 .tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;padding:4px 2px;font:inherit;cursor:pointer;text-align:center;line-height:1.1}
 .tab b{display:block;font-size:13px;font-weight:800;line-height:1.05}
 .tab span{font-size:8px;color:var(--mute);display:block;line-height:1.1;overflow-wrap:anywhere}
-.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on);box-shadow:0 0 14px var(--glow)}
 .tab[aria-selected="true"] span{color:inherit;opacity:.8}
-input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
+input{width:100%;border:1px solid var(--line);background:var(--panel);box-shadow:0 0 0 3px var(--glow);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;margin-bottom:12px}
 .tab:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px 4px}
 .grid.few{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px 6px}
@@ -31,7 +34,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 .grid.big{grid-template-columns:repeat(13,minmax(0,1fr));gap:5px 3px}
 .grid.big .card span{font-size:6.5px;line-height:7.5px;min-height:15px}
 .card{min-width:0;display:flex;flex-direction:column;gap:2px}
-.card .ic{position:relative;width:100%;aspect-ratio:1/1;border-radius:7px;overflow:hidden;background:linear-gradient(160deg,var(--bar,#9aa3ad),color-mix(in srgb,var(--bar,#9aa3ad) 80%,#000));box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.card .ic{position:relative;width:100%;aspect-ratio:1/1;border-radius:7px;overflow:hidden;background:linear-gradient(160deg,var(--bar,#9aa3ad),color-mix(in srgb,var(--bar,#9aa3ad) 80%,#000));box-shadow:inset 0 0 0 1px rgba(255,255,255,.28),0 0 0 1px var(--line)}
 .card img{display:block;width:100%;height:100%;object-fit:cover;background:transparent}
 .card span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:7px;line-height:8px;min-height:16px;text-align:left;overflow-wrap:anywhere;word-break:break-word;color:var(--ink)}
 .msg{color:var(--mute);font-size:11px;margin:6px 0}
@@ -41,6 +44,7 @@ input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(
 @media(max-width:360px){.tabs{gap:2px}.tab{padding:3px 1px}.tab b{font-size:12px}.tab span{font-size:7px}.grid{gap:5px 3px}}</style>
 </head>
 <body>
+<canvas id="snow" aria-hidden="true"></canvas>
 <main>
   <header>
     <div><h1 id="nick">Шкафчик</h1><div class="sub" id="sub">загружаю каталог…</div></div>
@@ -105,6 +109,28 @@ function render(){
     return'<div class="card" style="--glow:'+(GLOW[c.rar]||"rgba(255,210,74,.42)")+';--bar:'+(BAR[c.series&&BAR[c.series.toLowerCase()]?c.series.toLowerCase():c.rar]||"#9aa3ad")+'"><div class="ic"><img loading="lazy" decoding="async" alt="" onerror="this.style.opacity=.25" src="'+esc(c.img||"")+'"></div><span>'+esc(c.name)+'</span></div>'}).join("");
   document.getElementById("msg").textContent=(!items.length&&(by[cur]||[]).length)?"Ничего не найдено. Проверьте написание.":NOTE;
 }
+</script>
+<script>
+(function(){
+  var c=document.getElementById("snow");
+  if(!c||matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  var x=c.getContext("2d"),d=Math.min(devicePixelRatio||1,2),f=[],w,h;
+  function rs(){w=innerWidth;h=innerHeight;c.width=w*d;c.height=h*d;x.setTransform(d,0,0,d,0,0)}
+  rs();addEventListener("resize",rs);
+  for(var i=0;i<45;i++)f.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2.2+.6,s:Math.random()*.6+.25,p:Math.random()*6.28});
+  function t(){
+    var col=getComputedStyle(document.documentElement).getPropertyValue("--flake").trim()||"235,245,255";
+    x.clearRect(0,0,w,h);
+    f.forEach(function(a){
+      a.y+=a.s;a.p+=.012;a.x+=Math.sin(a.p)*.35;
+      if(a.y>h+4){a.y=-4;a.x=Math.random()*w}
+      x.beginPath();x.arc(a.x,a.y,a.r,0,6.283);
+      x.fillStyle="rgba("+col+","+(.3+a.r*.16)+")";x.fill();
+    });
+    requestAnimationFrame(t);
+  }
+  t();
+})();
 </script>
 </body>
 </html>
