@@ -76,7 +76,9 @@ fetch(API).then(function(r){return r.json()}).then(function(j){
   render();
 }).catch(function(){document.getElementById("sub").textContent="";document.getElementById("msg").textContent="Не удалось загрузить каталог предметов. Проверьте интернет и откройте шкафчик заново.";});
 document.getElementById("tabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b){cur=b.dataset.k;page=0;render();}});
-document.getElementById("q").addEventListener("input",function(){page=0;render();});\ndocument.getElementById("prev").addEventListener("click",function(){if(page>0){page--;render();}});\ndocument.getElementById("next").addEventListener("click",function(){page++;render();});
+document.getElementById("q").addEventListener("input",function(){page=0;render();});
+document.getElementById("prev").addEventListener("click",function(){if(page>0){page--;render();}});
+document.getElementById("next").addEventListener("click",function(){page++;render();});
 function render(){
   var q=document.getElementById("q").value.trim().toLowerCase();
   Array.prototype.forEach.call(document.getElementById("tabs").children,function(b){b.setAttribute("aria-selected",b.dataset.k===cur)});
